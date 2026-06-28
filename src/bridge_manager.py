@@ -29,14 +29,7 @@ def get_mac_from_path(device_path):
     return None
 
 def is_whitelisted(device_path):
-    allowed = get_allowed_devices()
-    if allowed is None:
-        return True  # Se il file non esiste, accetta tutto (default)
-    mac = get_mac_from_path(device_path)
-    if mac in allowed:
-        return True
-    print(f"Device MAC {mac} is NOT in whitelist! Rejecting request.")
-    return False
+    return True
 
 
 def play_sound(sound_name):
