@@ -9,6 +9,35 @@ from gi.repository import GLib
 
 STATUS_FILE = "/tmp/lp_status.json"
 SOUNDS_DIR = "/usr/local/share/lp_to_denon/sounds"
+CONFIG_FILE = "/etc/lp_to_denon.json"
+
+def get_allowed_devices():
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, "r") as f:
+                data = json.load(f)
+                return [addr.lower() for addr in data.get("allowed_devices", [])]
+        except Exception as e:
+            print(f"Error reading config file: {e}")
+    return None
+
+def get_mac_from_path(device_path):
+    parts = device_path.split("/")
+    for part in parts:
+        if part.startswith("dev_"):
+            return part[4:].replace("_", ":").lower()
+    return None
+
+def is_whitelisted(device_path):
+    allowed = get_allowed_devices()
+    if allowed is None:
+        return True  # Se il file non esiste, accetta tutto (default)
+    mac = get_mac_from_path(device_path)
+    if mac in allowed:
+        return True
+    print(f"Device MAC {mac} is NOT in whitelist! Rejecting request.")
+    return False
+
 
 def play_sound(sound_name):
     wav_path = os.path.join(SOUNDS_DIR, f"{sound_name}.wav")
@@ -43,27 +72,42 @@ class BluezAgent(dbus.service.Object):
 
     @dbus.service.method("org.bluez.Agent1", in_signature="os", out_signature="")
     def RequestConfirmation(self, device, passkey):
-        print(f"RequestConfirmation ({device}, {passkey}) -> Auto-Accepting")
+        print(f"RequestConfirmation ({device}, {passkey})")
+        if not is_whitelisted(device):
+            raise dbus.exceptions.DBusException("org.bluez.Error.Rejected")
+        print("Auto-Accepting")
         return
 
     @dbus.service.method("org.bluez.Agent1", in_signature="o", out_signature="")
     def RequestAuthorization(self, device):
-        print(f"RequestAuthorization ({device}) -> Auto-Accepting")
+        print(f"RequestAuthorization ({device})")
+        if not is_whitelisted(device):
+            raise dbus.exceptions.DBusException("org.bluez.Error.Rejected")
+        print("Auto-Accepting")
         return
 
     @dbus.service.method("org.bluez.Agent1", in_signature="os", out_signature="")
     def AuthorizeService(self, device, uuid):
-        print(f"AuthorizeService ({device}, {uuid}) -> Auto-Accepting")
+        print(f"AuthorizeService ({device}, {uuid})")
+        if not is_whitelisted(device):
+            raise dbus.exceptions.DBusException("org.bluez.Error.Rejected")
+        print("Auto-Accepting")
         return
 
     @dbus.service.method("org.bluez.Agent1", in_signature="o", out_signature="s")
     def RequestPinCode(self, device):
-        print(f"RequestPinCode ({device}) -> Auto-Accepting with '0000'")
+        print(f"RequestPinCode ({device})")
+        if not is_whitelisted(device):
+            raise dbus.exceptions.DBusException("org.bluez.Error.Rejected")
+        print("Auto-Accepting with '0000'")
         return "0000"
 
     @dbus.service.method("org.bluez.Agent1", in_signature="o", out_signature="u")
     def RequestPasskey(self, device):
-        print(f"RequestPasskey ({device}) -> Auto-Accepting with '000000'")
+        print(f"RequestPasskey ({device})")
+        if not is_whitelisted(device):
+            raise dbus.exceptions.DBusException("org.bluez.Error.Rejected")
+        print("Auto-Accepting with '000000'")
         return dbus.UInt32(0)
 
     @dbus.service.method("org.bluez.Agent1", in_signature="", out_signature="")
@@ -72,6 +116,11 @@ class BluezAgent(dbus.service.Object):
 
 def properties_changed(interface, changed, invalidated, path, bus):
     if interface != "org.bluez.Device1":
+        return
+    
+    mac = get_mac_from_path(path)
+    allowed = get_allowed_devices()
+    if allowed is not None and mac not in allowed:
         return
     
     if "Connected" in changed:
@@ -110,9 +159,13 @@ def check_initial_connection(bus):
     try:
         manager = dbus.Interface(bus.get_object("org.bluez", "/"), "org.freedesktop.DBus.ObjectManager")
         objects = manager.GetManagedObjects()
+        allowed = get_allowed_devices()
         for path, interfaces in objects.items():
             if "org.bluez.Device1" in interfaces:
                 props = interfaces["org.bluez.Device1"]
+                mac = get_mac_from_path(path)
+                if allowed is not None and mac not in allowed:
+                    continue
                 if props.get("Connected"):
                     name = str(props.get("Name", "Unknown Device"))
                     address = str(props.get("Address", "00:00:00:00:00:00"))

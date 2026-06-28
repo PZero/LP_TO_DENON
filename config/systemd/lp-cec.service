@@ -6,7 +6,7 @@ DefaultDependencies=no
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/python3 /usr/local/bin/lp_cec_monitor.py
+ExecStart=/usr/bin/python3 -u /usr/local/bin/lp_cec_monitor.py
 Restart=always
 RestartSec=5
 

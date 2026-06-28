@@ -6,7 +6,7 @@ Requires=bluetooth.target
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/python3 /usr/local/bin/lp_bridge_manager.py
+ExecStart=/usr/bin/python3 -u /usr/local/bin/lp_bridge_manager.py
 Restart=always
 RestartSec=5
 

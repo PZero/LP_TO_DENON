@@ -34,7 +34,7 @@ echo -e "${BLUE}1. Installazione pacchetti di sistema (APT)...${NC}"
 apt update
 
 # PipeWire and Audio dependencies
-apt install -y pipewire pipewire-pulse wireplumber bluez bluez-tools cec-utils
+apt install -y pipewire pipewire-pulse wireplumber libspa-0.2-bluetooth bluez bluez-tools cec-utils
 
 # Graphics/Kiosk dependencies
 apt install -y xserver-xorg xinit chromium-browser
@@ -101,6 +101,25 @@ fi
 echo -e "${BLUE}6. Abilitazione Linger per l'utente $REAL_USER...${NC}"
 loginctl enable-linger "$REAL_USER"
 
+# 7.1 Configure WirePlumber Bluetooth override
+echo -e "${BLUE}6.2 Configurazione WirePlumber per stabilità Bluetooth...${NC}"
+USER_HOME=$(eval echo ~$REAL_USER)
+WP_CONF_DIR="$USER_HOME/.config/wireplumber/bluetooth.lua.d"
+mkdir -p "$WP_CONF_DIR"
+cp config/wireplumber/bluetooth.lua.d/51-bt-config.lua "$WP_CONF_DIR/"
+chown -R "$REAL_USER:$REAL_USER" "$USER_HOME/.config"
+
+# Configure X11 to allow anybody to run X server (needed for kiosk mode)
+echo -e "${BLUE}6.1 Configurazione X11 per Kiosk Mode...${NC}"
+XWRAPPER="/etc/X11/Xwrapper.config"
+if [ -f "$XWRAPPER" ]; then
+    sed -i '/allowed_users/d' "$XWRAPPER"
+    echo "allowed_users=anybody" >> "$XWRAPPER"
+else
+    echo "allowed_users=anybody" > "$XWRAPPER"
+fi
+
+
 # 8. Configure Systemd services
 echo -e "${BLUE}7. Configurazione dei servizi Systemd...${NC}"
 SERVICES=("lp-bridge.service" "lp-cec.service" "lp-webui.service" "lp-kiosk.service")
@@ -120,10 +139,10 @@ done
 systemctl daemon-reload
 
 echo -e "${BLUE}8. Avvio dei servizi...${NC}"
-systemctl start lp-bridge.service
-systemctl start lp-cec.service
-systemctl start lp-webui.service
-systemctl start lp-kiosk.service
+systemctl restart lp-bridge.service
+systemctl restart lp-cec.service
+systemctl restart lp-webui.service
+systemctl restart lp-kiosk.service
 
 echo -e "${GREEN}=== Setup completato con successo! ===${NC}"
 echo -e "Il Raspberry Pi è ora configurato come ponte audio Bluetooth."
