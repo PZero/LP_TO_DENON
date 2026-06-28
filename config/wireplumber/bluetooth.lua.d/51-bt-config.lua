@@ -1,4 +1,7 @@
--- Force A2DP Source auto-connect (receives audio from turntable) and disable suspend timeout
+-- Set auto-connect globally for BlueZ monitor to include a2dp_source (turntable)
+bluez_monitor.properties["bluez5.auto-connect"] = "[ hfp_hf hsp_hs a2dp_sink a2dp_source ]"
+
+-- Disable suspend timeout for bluetooth audio nodes
 table.insert(bluez_monitor.rules, {
   matches = {
     {
@@ -6,7 +9,6 @@ table.insert(bluez_monitor.rules, {
     },
   },
   apply_properties = {
-    ["bluez5.auto-connect"] = "[ hfp_hf hsp_hs a2dp_sink a2dp_source ]",
     ["session.suspend-timeout-seconds"] = 0,
     ["node.pause-on-idle"] = false,
   },
