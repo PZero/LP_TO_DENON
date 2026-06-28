@@ -63,7 +63,7 @@ class BluezAgent(dbus.service.Object):
     def Release(self):
         print("Agent Release")
 
-    @dbus.service.method("org.bluez.Agent1", in_signature="os", out_signature="")
+    @dbus.service.method("org.bluez.Agent1", in_signature="ou", out_signature="")
     def RequestConfirmation(self, device, passkey):
         print(f"RequestConfirmation ({device}, {passkey})")
         if not is_whitelisted(device):
