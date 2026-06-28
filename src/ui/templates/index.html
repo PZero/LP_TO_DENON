@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LP to Denon - Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="background-glow"></div>
+    
+    <div class="container">
+        <header>
+            <div class="logo">LP <span>TO</span> DENON</div>
+            <div class="subtitle">System Status Monitor</div>
+        </header>
+
+        <main>
+            <!-- Mode 1: Searching -->
+            <div id="state-searching" class="status-panel active">
+                <div class="radar-container">
+                    <div class="radar-circle ring-1"></div>
+                    <div class="radar-circle ring-2"></div>
+                    <div class="radar-circle ring-3"></div>
+                    <div class="radar-center">
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M7 7l10 10-5 5V2l5 5L7 17"/>
+                        </svg>
+                    </div>
+                </div>
+                <div class="status-info">
+                    <h2 class="pulsing-text">Ricerca Giradischi in corso...</h2>
+                    <p class="desc">Accendi il giradischi Bluetooth per avviare il collegamento automatico</p>
+                </div>
+            </div>
+
+            <!-- Mode 2: Connected -->
+            <div id="state-connected" class="status-panel">
+                <div class="vinyl-container">
+                    <div class="vinyl">
+                        <div class="vinyl-grooves"></div>
+                        <div class="vinyl-label">
+                            <div class="vinyl-label-center"></div>
+                        </div>
+                    </div>
+                    <div class="tonearm">
+                        <svg viewBox="0 0 50 150" width="50" height="150" fill="none" stroke="currentColor" stroke-width="3">
+                            <!-- Tonearm base and arm -->
+                            <circle cx="25" cy="20" r="10" fill="#222" stroke="#444"/>
+                            <path d="M25 20 C25 60, 40 80, 40 120" stroke="#bbb" stroke-width="4"/>
+                            <!-- Cartridge/Headshell -->
+                            <rect x="33" y="120" width="14" height="20" rx="2" fill="#e91e63" stroke="#ff4081"/>
+                            <!-- Needle tip -->
+                            <circle cx="40" cy="140" r="2" fill="#fff"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="status-info">
+                    <div class="badge-connected">CONNESSO</div>
+                    <h2 id="device-name">Giradischi Bluetooth</h2>
+                    <p id="device-address" class="mac-address">00:00:00:00:00:00</p>
+                </div>
+
+                <div class="equalizer">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <div class="connection-status">
+                <span class="status-dot green"></span> HDMI Audio: PCM Stereo 48kHz
+            </div>
+            <div class="host-info" id="ip-info">
+                Caricamento...
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentStatus = "searching";
+        
+        // Show device IP on screen if connected to network
+        // RPi will serve this on local IP
+        document.getElementById('ip-info').innerText = "Web Interface: http://" + window.location.hostname + ":5000";
+
+        async function updateStatus() {
+            try {
+                const response = await fetch('/api/status');
+                if (!response.ok) throw new Error("Network response was not ok");
+                
+                const data = await response.json();
+                
+                const searchingPanel = document.getElementById('state-searching');
+                const connectedPanel = document.getElementById('state-connected');
+                
+                if (data.status === 'connected') {
+                    document.getElementById('device-name').innerText = data.device_name || "Giradischi Bluetooth";
+                    document.getElementById('device-address').innerText = data.device_address || "00:00:00:00:00:00";
+                    
+                    if (currentStatus !== 'connected') {
+                        searchingPanel.classList.remove('active');
+                        setTimeout(() => {
+                            connectedPanel.classList.add('active');
+                        }, 300);
+                        currentStatus = 'connected';
+                    }
+                } else {
+                    if (currentStatus !== 'searching') {
+                        connectedPanel.classList.remove('active');
+                        setTimeout(() => {
+                            searchingPanel.classList.add('active');
+                        }, 300);
+                        currentStatus = 'searching';
+                    }
+                }
+            } catch (error) {
+                console.error("Errore nel recupero dello stato:", error);
+            }
+        }
+
+        // Poll status every 1 second
+        setInterval(updateStatus, 1000);
+        updateStatus(); // Initial call
+    </script>
+</body>
+</html>

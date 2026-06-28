@@ -1,0 +1,14 @@
+[Unit]
+Description=LP to Denon Bluetooth Bridge Manager
+After=bluetooth.target sound.target pipewire.service
+Requires=bluetooth.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /usr/local/bin/lp_bridge_manager.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

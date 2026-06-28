@@ -1,0 +1,15 @@
+[Unit]
+Description=LP to Denon HDMI Kiosk Display
+After=systemd-user-sessions.service network.target sound.target lp-webui.service
+Requires=lp-webui.service
+
+[Service]
+User=@USER@
+WorkingDirectory=/home/@USER@
+Type=simple
+ExecStart=/usr/bin/xinit /etc/X11/Xsession /usr/local/bin/lp_kiosk_start.sh -- -nocursor -quiet
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

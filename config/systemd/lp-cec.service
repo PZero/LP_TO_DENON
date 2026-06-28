@@ -1,0 +1,14 @@
+[Unit]
+Description=LP to Denon HDMI-CEC Power Monitor
+After=multi-user.target
+DefaultDependencies=no
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/bin/python3 /usr/local/bin/lp_cec_monitor.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
