@@ -45,19 +45,17 @@ body {
 }
 
 .container {
-    width: 90%;
-    max-width: 900px;
-    height: 85vh;
+    width: 100vw;
+    height: 100vh;
+    max-width: none;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     z-index: 2;
-    background: var(--bg-card);
-    backdrop-filter: blur(20px);
-    border: 1px solid var(--border-glass);
-    border-radius: 24px;
-    padding: 40px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    background: rgba(8, 8, 16, 0.4);
+    backdrop-filter: blur(10px);
+    padding: 30px 60px;
+    position: relative;
 }
 
 /* Header */
@@ -402,14 +400,14 @@ footer {
 }
 
 .album-sleeve {
-    width: 180px;
-    height: 180px;
-    background: linear-gradient(145deg, #1e1e24, #0f0f12);
+    width: 280px;
+    height: 280px;
+    background: #111;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 8px;
     position: relative;
     z-index: 10;
-    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.7);
+    box-shadow: 15px 15px 40px rgba(0, 0, 0, 0.8);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -419,58 +417,32 @@ footer {
 .cover-art {
     width: 100%;
     height: 100%;
-    padding: 20px;
+    padding: 0;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    background: radial-gradient(circle at center, #2e241f 0%, #0d0908 100%);
-    border: 2px solid #b8860b;
 }
 
-.cover-title {
-    font-family: var(--font-header);
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #ffd700;
-    letter-spacing: 2px;
-    text-align: center;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-}
-
-.cover-subtitle {
-    font-family: var(--font-body);
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #e5e7eb;
-    letter-spacing: 4px;
-    text-align: center;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 4px 0;
-    width: 80%;
-}
-
-.cover-details {
-    font-size: 0.5rem;
-    color: #9ca3af;
-    letter-spacing: 1px;
+.cover-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .vinyl-spin-container {
     position: absolute;
-    left: 80px;
-    width: 180px;
-    height: 180px;
+    left: 120px;
+    width: 280px;
+    height: 280px;
     z-index: 5;
 }
 
 /* Reuse existing .vinyl styling, just override size and positioning */
 .vinyl-spin-container .vinyl {
-    width: 170px;
-    height: 170px;
+    width: 270px;
+    height: 270px;
     margin: 5px;
-    box-shadow: 5px 5px 20px rgba(0,0,0,0.8);
+    box-shadow: 5px 5px 25px rgba(0,0,0,0.9);
 }
 
 /* --- PLAYBACK CONTROLS & PROGRESS --- */
@@ -481,7 +453,7 @@ footer {
 
 .playback-controls h3 {
     font-family: var(--font-header);
-    font-size: 1.4rem;
+    font-size: 1.6rem;
     color: var(--text-primary);
     margin-bottom: 12px;
     white-space: nowrap;
@@ -494,15 +466,15 @@ footer {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
     color: var(--text-secondary);
 }
 
 .progress-bar-bg {
     flex-grow: 1;
-    height: 6px;
+    height: 8px;
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
     position: relative;
 }
@@ -511,7 +483,7 @@ footer {
     height: 100%;
     width: 0%;
     background: linear-gradient(to right, var(--accent-cyan), var(--accent-magenta));
-    border-radius: 3px;
+    border-radius: 4px;
     transition: width 0.5s linear;
 }
 
@@ -522,36 +494,61 @@ footer {
     align-items: center;
     border-bottom: 1px solid var(--border-glass);
     padding-bottom: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
 }
 
 .tracklist-header h3 {
     font-family: var(--font-header);
-    font-size: 0.95rem;
+    font-size: 1.2rem;
     color: var(--text-primary);
     letter-spacing: 1px;
 }
 
-.vinyl-spec {
-    font-size: 0.75rem;
-    color: var(--accent-magenta);
-    font-weight: 600;
+.side-selector {
+    display: flex;
+    gap: 8px;
+}
+
+.side-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-body);
+}
+
+.side-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+.side-btn.active {
+    background: linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta));
+    border-color: transparent;
+    color: #000;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.4);
 }
 
 .tracklist {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .track-item {
     display: flex;
     align-items: center;
-    padding: 10px 14px;
-    border-radius: 8px;
+    padding: 12px 18px;
+    border-radius: 10px;
     background: rgba(255, 255, 255, 0.01);
     transition: all 0.3s ease;
     border: 1px solid transparent;
+    cursor: pointer;
 }
 
 .track-item:hover {
@@ -565,8 +562,8 @@ footer {
 }
 
 .track-number {
-    width: 24px;
-    font-size: 0.85rem;
+    width: 30px;
+    font-size: 1rem;
     color: var(--text-secondary);
     font-weight: 600;
 }
@@ -577,7 +574,7 @@ footer {
 
 .track-name {
     flex-grow: 1;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     color: var(--text-primary);
     text-align: left;
     font-weight: 500;
@@ -590,10 +587,30 @@ footer {
 }
 
 .track-time {
-    font-size: 0.85rem;
+    font-size: 1rem;
     color: var(--text-secondary);
 }
 
 .track-item.active .track-time {
     color: var(--accent-cyan);
+}
+
+/* --- BACKGROUND ALBUM ART EFFECTS --- */
+.background-cover-art {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    filter: blur(80px) brightness(0.2);
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+    pointer-events: none;
+}
+
+body.connected .background-cover-art {
+    opacity: 1;
 }

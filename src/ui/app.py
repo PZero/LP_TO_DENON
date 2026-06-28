@@ -3,7 +3,7 @@ import json
 import os
 
 app = Flask(__name__)
-STATUS_FILE = "/tmp/lp_status.json"
+STATUS_FILE = "/usr/local/share/lp_to_denon/lp_status.json"
 
 def get_current_status():
     if os.path.exists(STATUS_FILE):

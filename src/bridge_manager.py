@@ -7,7 +7,7 @@ import dbus.service
 import dbus.mainloop.glib
 from gi.repository import GLib
 
-STATUS_FILE = "/tmp/lp_status.json"
+STATUS_FILE = "/usr/local/share/lp_to_denon/lp_status.json"
 SOUNDS_DIR = "/usr/local/share/lp_to_denon/sounds"
 CONFIG_FILE = "/etc/lp_to_denon.json"
 

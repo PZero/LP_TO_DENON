@@ -57,7 +57,7 @@ cp src/ui/app.py "$INSTALL_DIR/ui/app.py"
 cp src/ui/kiosk_start.sh /usr/local/bin/lp_kiosk_start.sh
 
 cp src/ui/templates/index.html "$INSTALL_DIR/ui/templates/"
-cp src/ui/static/style.css "$INSTALL_DIR/ui/static/"
+cp -r src/ui/static/* "$INSTALL_DIR/ui/static/"
 
 chmod +x /usr/local/bin/lp_bridge_manager.py
 chmod +x /usr/local/bin/lp_cec_monitor.py

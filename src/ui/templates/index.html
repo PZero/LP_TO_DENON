@@ -6,10 +6,12 @@
     <title>LP to Denon - Monitor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <!-- Blurred album cover background when connected -->
+    <div class="background-cover-art" id="bg-cover-art" style="background-image: url('{{ url_for('static', filename='cover.jpg') }}');"></div>
     <div class="background-glow"></div>
     
     <div class="container">
@@ -45,9 +47,7 @@
                         <div class="album-display">
                             <div class="album-sleeve">
                                 <div class="cover-art">
-                                    <div class="cover-title">CARLO CONTE</div>
-                                    <div class="cover-subtitle">COLLEZIONE</div>
-                                    <div class="cover-details">HI-FI STEREO RECORDING</div>
+                                    <img src="{{ url_for('static', filename='cover.jpg') }}" alt="Paolo Conte - Collezione">
                                 </div>
                             </div>
                             <div class="vinyl-spin-container">
@@ -75,8 +75,11 @@
                     <!-- Right: Tracklist -->
                     <div class="player-right">
                         <div class="tracklist-header">
-                            <h3>CARLO CONTE - COLLEZIONE</h3>
-                            <span class="vinyl-spec">Lato A • 33 RPM</span>
+                            <h3>PAOLO CONTE - COLLEZIONE</h3>
+                            <div class="side-selector">
+                                <button class="side-btn active" id="btn-side-a" onclick="switchSide('A')">LATO A</button>
+                                <button class="side-btn" id="btn-side-b" onclick="switchSide('B')">LATO B</button>
+                            </div>
                         </div>
                         <div class="tracklist" id="tracklist-container">
                             <!-- Populated by JS -->
@@ -109,16 +112,25 @@
         let currentStatus = "searching";
         let elapsedSeconds = 0;
         let playbackInterval = null;
+        let currentSide = 'A';
 
-        // Tracks of "Carlo Conte - Collezione"
-        const tracks = [
-            { name: "Via con me", duration: 166 },             // 2:46
-            { name: "Un gelato al limon", duration: 312 },     // 5:12
-            { name: "Azzurro", duration: 172 },                // 2:52
-            { name: "Bartali", duration: 182 },                // 3:02
-            { name: "Genova per noi", duration: 178 },         // 2:58
-            { name: "Sotto le stelle del jazz", duration: 225 } // 3:45
+        // Tracks of "Paolo Conte - Collezione"
+        const tracksA = [
+            { name: "Azzurra (Una Mattina)", duration: 225 },       // 3:45
+            { name: "Sparring Partner", duration: 251 },            // 4:11
+            { name: "Via Con Me (It's Wonderful)", duration: 166 }, // 2:46
+            { name: "Boogie", duration: 312 },                     // 5:12
+            { name: "Bartali", duration: 182 }                      // 3:02
         ];
+        const tracksB = [
+            { name: "Gelato al Limon", duration: 312 },             // 5:12
+            { name: "Let's Fall in Love", duration: 207 },          // 3:27
+            { name: "Genova Per Noi", duration: 178 },              // 2:58
+            { name: "Max", duration: 225 },                         // 3:45
+            { name: "La Donna d'Inverno", duration: 189 }           // 3:09
+        ];
+
+        let currentTracks = tracksA;
 
         // Format seconds to mm:ss
         function formatTime(sec) {
@@ -128,21 +140,56 @@
         }
 
         // Build tracklist UI
-        const tracklistContainer = document.getElementById('tracklist-container');
-        tracks.forEach((track, index) => {
-            const item = document.createElement('div');
-            item.className = 'track-item';
-            item.id = `track-${index}`;
-            item.innerHTML = `
-                <span class="track-number">${index + 1}</span>
-                <span class="track-name">${track.name}</span>
-                <span class="track-time">${formatTime(track.duration)}</span>
-            `;
-            tracklistContainer.appendChild(item);
-        });
+        function buildTracklist() {
+            const tracklistContainer = document.getElementById('tracklist-container');
+            tracklistContainer.innerHTML = '';
+            currentTracks.forEach((track, index) => {
+                const item = document.createElement('div');
+                item.className = 'track-item';
+                item.id = `track-${index}`;
+                item.innerHTML = `
+                    <span class="track-number">${index + 1}</span>
+                    <span class="track-name">${track.name}</span>
+                    <span class="track-time">${formatTime(track.duration)}</span>
+                `;
+                item.onclick = () => {
+                    selectTrack(index);
+                };
+                tracklistContainer.appendChild(item);
+            });
+        }
+
+        // Handle side switching
+        function switchSide(side) {
+            if (currentSide === side) return;
+            currentSide = side;
+            currentTracks = (side === 'A') ? tracksA : tracksB;
+            
+            // Toggle active button class
+            document.getElementById('btn-side-a').classList.toggle('active', side === 'A');
+            document.getElementById('btn-side-b').classList.toggle('active', side === 'B');
+            
+            // Rebuild tracklist and reset time estimation
+            buildTracklist();
+            elapsedSeconds = 0;
+            updatePlaybackProgress();
+        }
+
+        // Handle manual track selection
+        function selectTrack(index) {
+            let accumulated = 0;
+            for (let i = 0; i < index; i++) {
+                accumulated += currentTracks[i].duration;
+            }
+            elapsedSeconds = accumulated;
+            updatePlaybackProgress();
+        }
 
         // Set local IP info
         document.getElementById('ip-info').innerText = "Web Interface: http://" + window.location.hostname + ":5000";
+
+        // Build initial tracklist
+        buildTracklist();
 
         // Estimate active track based on elapsed seconds since connection
         function updatePlaybackProgress() {
@@ -150,23 +197,23 @@
 
             elapsedSeconds++;
             
-            let totalAlbumTime = tracks.reduce((acc, t) => acc + t.duration, 0);
+            let totalAlbumTime = currentTracks.reduce((acc, t) => acc + t.duration, 0);
             let timeInLoop = elapsedSeconds % totalAlbumTime;
             
             let accumulatedTime = 0;
             let activeTrackIndex = 0;
             let trackElapsed = 0;
 
-            for (let i = 0; i < tracks.length; i++) {
-                if (timeInLoop >= accumulatedTime && timeInLoop < accumulatedTime + tracks[i].duration) {
+            for (let i = 0; i < currentTracks.length; i++) {
+                if (timeInLoop >= accumulatedTime && timeInLoop < accumulatedTime + currentTracks[i].duration) {
                     activeTrackIndex = i;
                     trackElapsed = timeInLoop - accumulatedTime;
                     break;
                 }
-                accumulatedTime += tracks[i].duration;
+                accumulatedTime += currentTracks[i].duration;
             }
 
-            const activeTrack = tracks[activeTrackIndex];
+            const activeTrack = currentTracks[activeTrackIndex];
 
             // Update UI elements
             document.getElementById('current-track-title').innerText = activeTrack.name;
@@ -178,12 +225,14 @@
             document.getElementById('track-progress').style.width = `${pct}%`;
 
             // Update active tracklist item highlight
-            tracks.forEach((_, idx) => {
+            currentTracks.forEach((_, idx) => {
                 const el = document.getElementById(`track-${idx}`);
-                if (idx === activeTrackIndex) {
-                    el.classList.add('active');
-                } else {
-                    el.classList.remove('active');
+                if (el) {
+                    if (idx === activeTrackIndex) {
+                        el.classList.add('active');
+                    } else {
+                        el.classList.remove('active');
+                    }
                 }
             });
         }
@@ -199,6 +248,7 @@
                 const connectedPanel = document.getElementById('state-connected');
                 
                 if (data.status === 'connected') {
+                    document.body.classList.add('connected');
                     if (currentStatus !== 'connected') {
                         // Reset timer and start playback loop
                         elapsedSeconds = 0;
@@ -215,6 +265,7 @@
                         updatePlaybackProgress();
                     }
                 } else {
+                    document.body.classList.remove('connected');
                     if (currentStatus !== 'searching') {
                         if (playbackInterval) {
                             clearInterval(playbackInterval);
@@ -239,4 +290,3 @@
     </script>
 </body>
 </html>
-
