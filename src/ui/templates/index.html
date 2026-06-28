@@ -6,7 +6,7 @@
     <title>LP to Denon - Monitor</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -32,62 +32,72 @@
                     </div>
                 </div>
                 <div class="status-info">
-                    <h2 class="pulsing-text">Ricerca Giradischi in corso...</h2>
+                    <h2 class="pulsing-text">Ricerca Giradischi...</h2>
                     <p class="desc">Accendi il giradischi Bluetooth per avviare il collegamento automatico</p>
                 </div>
             </div>
 
             <!-- Mode 2: Connected -->
             <div id="state-connected" class="status-panel">
-                <div class="vinyl-container">
-                    <div class="vinyl">
-                        <div class="vinyl-grooves"></div>
-                        <div class="vinyl-label">
-                            <div class="vinyl-label-center"></div>
+                <div class="player-layout">
+                    <!-- Left: Vinyl & Album Art -->
+                    <div class="player-left">
+                        <div class="album-display">
+                            <div class="album-sleeve">
+                                <div class="cover-art">
+                                    <div class="cover-title">CARLO CONTE</div>
+                                    <div class="cover-subtitle">COLLEZIONE</div>
+                                    <div class="cover-details">HI-FI STEREO RECORDING</div>
+                                </div>
+                            </div>
+                            <div class="vinyl-spin-container">
+                                <div class="vinyl">
+                                    <div class="vinyl-grooves"></div>
+                                    <div class="vinyl-label">
+                                        <div class="vinyl-label-center"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="playback-controls">
+                            <div class="badge-connected">CONNESSO</div>
+                            <h3 id="current-track-title">In attesa dell'avvio...</h3>
+                            <div class="progress-container">
+                                <span id="time-elapsed">0:00</span>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill" id="track-progress"></div>
+                                </div>
+                                <span id="time-total">0:00</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="tonearm">
-                        <svg viewBox="0 0 50 150" width="50" height="150" fill="none" stroke="currentColor" stroke-width="3">
-                            <!-- Tonearm base and arm -->
-                            <circle cx="25" cy="20" r="10" fill="#222" stroke="#444"/>
-                            <path d="M25 20 C25 60, 40 80, 40 120" stroke="#bbb" stroke-width="4"/>
-                            <!-- Cartridge/Headshell -->
-                            <rect x="33" y="120" width="14" height="20" rx="2" fill="#e91e63" stroke="#ff4081"/>
-                            <!-- Needle tip -->
-                            <circle cx="40" cy="140" r="2" fill="#fff"/>
-                        </svg>
+
+                    <!-- Right: Tracklist -->
+                    <div class="player-right">
+                        <div class="tracklist-header">
+                            <h3>CARLO CONTE - COLLEZIONE</h3>
+                            <span class="vinyl-spec">Lato A • 33 RPM</span>
+                        </div>
+                        <div class="tracklist" id="tracklist-container">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
-                </div>
-                
-                <div class="status-info">
-                    <div class="badge-connected">CONNESSO</div>
-                    <h2 id="device-name">Giradischi Bluetooth</h2>
-                    <p id="device-address" class="mac-address">00:00:00:00:00:00</p>
                 </div>
 
                 <div class="equalizer">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+                    <div class="bar"></div><div class="bar"></div><div class="bar"></div>
                 </div>
             </div>
         </main>
         
         <footer>
             <div class="connection-status">
-                <span class="status-dot green"></span> HDMI Audio: PCM Stereo 48kHz
+                <span class="status-dot green"></span>
+                <span id="output-sink-name">HDMI Audio: PCM Stereo 48kHz</span>
             </div>
             <div class="host-info" id="ip-info">
                 Caricamento...
@@ -97,10 +107,86 @@
 
     <script>
         let currentStatus = "searching";
-        
-        // Show device IP on screen if connected to network
-        // RPi will serve this on local IP
+        let elapsedSeconds = 0;
+        let playbackInterval = null;
+
+        // Tracks of "Carlo Conte - Collezione"
+        const tracks = [
+            { name: "Via con me", duration: 166 },             // 2:46
+            { name: "Un gelato al limon", duration: 312 },     // 5:12
+            { name: "Azzurro", duration: 172 },                // 2:52
+            { name: "Bartali", duration: 182 },                // 3:02
+            { name: "Genova per noi", duration: 178 },         // 2:58
+            { name: "Sotto le stelle del jazz", duration: 225 } // 3:45
+        ];
+
+        // Format seconds to mm:ss
+        function formatTime(sec) {
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        // Build tracklist UI
+        const tracklistContainer = document.getElementById('tracklist-container');
+        tracks.forEach((track, index) => {
+            const item = document.createElement('div');
+            item.className = 'track-item';
+            item.id = `track-${index}`;
+            item.innerHTML = `
+                <span class="track-number">${index + 1}</span>
+                <span class="track-name">${track.name}</span>
+                <span class="track-time">${formatTime(track.duration)}</span>
+            `;
+            tracklistContainer.appendChild(item);
+        });
+
+        // Set local IP info
         document.getElementById('ip-info').innerText = "Web Interface: http://" + window.location.hostname + ":5000";
+
+        // Estimate active track based on elapsed seconds since connection
+        function updatePlaybackProgress() {
+            if (currentStatus !== 'connected') return;
+
+            elapsedSeconds++;
+            
+            let totalAlbumTime = tracks.reduce((acc, t) => acc + t.duration, 0);
+            let timeInLoop = elapsedSeconds % totalAlbumTime;
+            
+            let accumulatedTime = 0;
+            let activeTrackIndex = 0;
+            let trackElapsed = 0;
+
+            for (let i = 0; i < tracks.length; i++) {
+                if (timeInLoop >= accumulatedTime && timeInLoop < accumulatedTime + tracks[i].duration) {
+                    activeTrackIndex = i;
+                    trackElapsed = timeInLoop - accumulatedTime;
+                    break;
+                }
+                accumulatedTime += tracks[i].duration;
+            }
+
+            const activeTrack = tracks[activeTrackIndex];
+
+            // Update UI elements
+            document.getElementById('current-track-title').innerText = activeTrack.name;
+            document.getElementById('time-elapsed').innerText = formatTime(trackElapsed);
+            document.getElementById('time-total').innerText = formatTime(activeTrack.duration);
+
+            // Progress bar fill
+            const pct = (trackElapsed / activeTrack.duration) * 100;
+            document.getElementById('track-progress').style.width = `${pct}%`;
+
+            // Update active tracklist item highlight
+            tracks.forEach((_, idx) => {
+                const el = document.getElementById(`track-${idx}`);
+                if (idx === activeTrackIndex) {
+                    el.classList.add('active');
+                } else {
+                    el.classList.remove('active');
+                }
+            });
+        }
 
         async function updateStatus() {
             try {
@@ -113,18 +199,28 @@
                 const connectedPanel = document.getElementById('state-connected');
                 
                 if (data.status === 'connected') {
-                    document.getElementById('device-name').innerText = data.device_name || "Giradischi Bluetooth";
-                    document.getElementById('device-address').innerText = data.device_address || "00:00:00:00:00:00";
-                    
                     if (currentStatus !== 'connected') {
+                        // Reset timer and start playback loop
+                        elapsedSeconds = 0;
+                        if (playbackInterval) clearInterval(playbackInterval);
+                        playbackInterval = setInterval(updatePlaybackProgress, 1000);
+                        
                         searchingPanel.classList.remove('active');
                         setTimeout(() => {
                             connectedPanel.classList.add('active');
                         }, 300);
                         currentStatus = 'connected';
+                        
+                        // Initial update
+                        updatePlaybackProgress();
                     }
                 } else {
                     if (currentStatus !== 'searching') {
+                        if (playbackInterval) {
+                            clearInterval(playbackInterval);
+                            playbackInterval = null;
+                        }
+                        
                         connectedPanel.classList.remove('active');
                         setTimeout(() => {
                             searchingPanel.classList.add('active');
@@ -137,9 +233,10 @@
             }
         }
 
-        // Poll status every 1 second
-        setInterval(updateStatus, 1000);
+        // Poll status every 1.5 seconds
+        setInterval(updateStatus, 1500);
         updateStatus(); // Initial call
     </script>
 </body>
 </html>
+

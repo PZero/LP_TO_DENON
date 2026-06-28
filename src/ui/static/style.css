@@ -359,3 +359,241 @@ footer {
     font-family: var(--font-header);
     letter-spacing: 1px;
 }
+
+/* --- SPLIT PLAYER LAYOUT --- */
+.player-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    gap: 40px;
+    align-items: stretch;
+    justify-content: space-between;
+}
+
+.player-left {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+}
+
+.player-right {
+    flex: 1.5;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-glass);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    max-height: 380px;
+    overflow-y: auto;
+}
+
+/* --- ALBUM DISPLAY & SPINNING VINYL --- */
+.album-display {
+    position: relative;
+    width: 260px;
+    height: 180px;
+    display: flex;
+    align-items: center;
+}
+
+.album-sleeve {
+    width: 180px;
+    height: 180px;
+    background: linear-gradient(145deg, #1e1e24, #0f0f12);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 10px 10px 30px rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.cover-art {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    background: radial-gradient(circle at center, #2e241f 0%, #0d0908 100%);
+    border: 2px solid #b8860b;
+}
+
+.cover-title {
+    font-family: var(--font-header);
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #ffd700;
+    letter-spacing: 2px;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+}
+
+.cover-subtitle {
+    font-family: var(--font-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #e5e7eb;
+    letter-spacing: 4px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 4px 0;
+    width: 80%;
+}
+
+.cover-details {
+    font-size: 0.5rem;
+    color: #9ca3af;
+    letter-spacing: 1px;
+}
+
+.vinyl-spin-container {
+    position: absolute;
+    left: 80px;
+    width: 180px;
+    height: 180px;
+    z-index: 5;
+}
+
+/* Reuse existing .vinyl styling, just override size and positioning */
+.vinyl-spin-container .vinyl {
+    width: 170px;
+    height: 170px;
+    margin: 5px;
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.8);
+}
+
+/* --- PLAYBACK CONTROLS & PROGRESS --- */
+.playback-controls {
+    width: 100%;
+    text-align: center;
+}
+
+.playback-controls h3 {
+    font-family: var(--font-header);
+    font-size: 1.4rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.progress-bar-bg {
+    flex-grow: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(to right, var(--accent-cyan), var(--accent-magenta));
+    border-radius: 3px;
+    transition: width 0.5s linear;
+}
+
+/* --- TRACKLIST --- */
+.tracklist-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-glass);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.tracklist-header h3 {
+    font-family: var(--font-header);
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    letter-spacing: 1px;
+}
+
+.vinyl-spec {
+    font-size: 0.75rem;
+    color: var(--accent-magenta);
+    font-weight: 600;
+}
+
+.tracklist {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.track-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.01);
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.track-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    border-color: rgba(255, 255, 255, 0.04);
+}
+
+.track-item.active {
+    background: rgba(0, 242, 254, 0.08);
+    border-color: rgba(0, 242, 254, 0.25);
+}
+
+.track-number {
+    width: 24px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.track-item.active .track-number {
+    color: var(--accent-cyan);
+}
+
+.track-name {
+    flex-grow: 1;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    text-align: left;
+    font-weight: 500;
+}
+
+.track-item.active .track-name {
+    color: var(--accent-cyan);
+    font-weight: 600;
+    text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+}
+
+.track-time {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.track-item.active .track-time {
+    color: var(--accent-cyan);
+}
