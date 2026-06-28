@@ -19,7 +19,4 @@ chromium-browser \
     --kiosk \
     --ozone-platform=x11 \
     --autoplay-policy=no-user-gesture-required \
-    --window-size=1920,1080 \
-    --window-position=0,0 \
-    --start-maximized \
     http://localhost:5000
