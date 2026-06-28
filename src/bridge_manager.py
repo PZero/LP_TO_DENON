@@ -196,9 +196,9 @@ def main():
     try:
         manager_obj = bus.get_object("org.bluez", "/org/bluez")
         agent_manager = dbus.Interface(manager_obj, "org.bluez.AgentManager1")
-        agent_manager.RegisterAgent(agent_path, "NoInputNoOutput")
+        agent_manager.RegisterAgent(agent_path, "DisplayYesNo")
         agent_manager.RequestDefaultAgent(agent_path)
-        print("Bluetooth Agent registered with capability 'NoInputNoOutput' and set as default.")
+        print("Bluetooth Agent registered with capability 'DisplayYesNo' and set as default.")
     except Exception as e:
         print(f"Failed to register Bluetooth Agent: {e}")
         sys.exit(1)
